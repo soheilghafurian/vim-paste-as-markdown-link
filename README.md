@@ -127,6 +127,41 @@ Ensure you're running a version of macOS that supports the NSPasteboard APIs (ma
 
 The plugin handles simple nested tags like `<a href="url"><span>text</span></a>` by extracting just the text content.
 
+## Development
+
+### Running Tests
+
+The plugin includes a comprehensive test suite. To run the tests:
+
+```bash
+# Using make
+make test
+
+# Or directly with Vim
+vim -es -N -u NONE -i NONE -c "set nocompatible" -c "source test/run_tests.vim"
+
+# Or using the shell script
+./test/run_tests.sh
+```
+
+Test results are also written to `test/results.txt`.
+
+### Project Structure
+
+```
+paste_as_markdown_link/
+├── plugin/
+│   └── paste_as_markdown_link.vim   # Plugin initialization
+├── autoload/
+│   └── paste_as_markdown_link.vim   # Core functions (lazy-loaded)
+├── test/
+│   ├── run_tests.vim                # Unit test suite
+│   └── run_tests.sh                 # Test runner script
+├── Makefile                         # Build/test automation
+├── README.md                        # This file
+└── LICENSE                          # MIT License
+```
+
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.

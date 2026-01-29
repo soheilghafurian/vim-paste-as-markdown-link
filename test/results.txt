@@ -1,0 +1,55 @@
+
+Testing HTML to Markdown Conversion:
+  PASS: Simple anchor tag conversion
+  PASS: Anchor with single quotes
+  PASS: Multiple anchor tags
+  PASS: Anchor with other attributes
+  PASS: Anchor with href not first attribute
+  PASS: Empty anchor text uses URL
+  PASS: Anchor with nested span
+  PASS: Text mixed with anchor
+  PASS: Strip other HTML tags
+
+Testing HTML Entity Decoding:
+  PASS: Decode &amp; entity
+  PASS: Decode &lt; and &gt; entities
+  PASS: Decode &quot; entity
+  PASS: Decode &nbsp; entity
+  PASS: Decode numeric entities (decimal)
+  PASS: Decode numeric entities (hex)
+
+Testing Edge Cases:
+  PASS: Plain text passes through unchanged
+  PASS: Empty input returns empty
+  PASS: URL with query params and anchor
+  PASS: Link text with brackets
+  PASS: Uppercase HTML tags
+  PASS: Whitespace trimmed from link text
+
+Testing Platform Detection:
+  PASS: Platform detection returns a value
+  PASS: Platform is valid value
+
+Testing Plugin Configuration:
+  PASS: Plugin enabled by default
+  PASS: Plugin can be disabled
+  PASS: PasteAsMarkdownLink command exists
+
+Testing Additional Edge Cases:
+  PASS: Deeply nested HTML in anchor
+  PASS: Multiple links in paragraph
+  PASS: Mixed case attributes
+  PASS: Newlines normalized in link text
+  PASS: Self-closing tags stripped
+  PASS: HTML comments stripped
+  PASS: URL with percent encoding preserved
+  PASS: Link in table cell
+
+Testing Helper Functions:
+  PASS: make_link with empty text uses URL
+  PASS: make_link strips HTML from text
+  PASS: decode_entities handles multiple entities
+
+============================================================
+Test Results: 37/37 passed
+============================================================

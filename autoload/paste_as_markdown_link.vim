@@ -136,23 +136,12 @@ endfunction
 function! s:convert_html_to_markdown(html) abort
   let l:result = a:html
 
-  " Convert anchor tags to markdown links
-  " Pattern matches <a href="url">text</a> with various attribute orders
-  " Handle href with double quotes
+  " Convert all anchor tags to markdown links using a function for proper handling
+  " This pattern matches any <a> tag with href (handles both quote styles, nested content, etc.)
+  " Use \c for case-insensitive matching
   let l:result = substitute(l:result,
-        \ '<a\s[^>]*href="\([^"]*\)"[^>]*>\([^<]*\)</a>',
-        \ '[\2](\1)', 'gi')
-
-  " Handle href with single quotes
-  let l:result = substitute(l:result,
-        \ "<a\\s[^>]*href='\\([^']*\\)'[^>]*>\\([^<]*\\)</a>",
-        \ '[\\2](\\1)', 'gi')
-
-  " Handle links with nested tags (e.g., <a href="url"><span>text</span></a>)
-  " First, extract just the text content from nested tags
-  let l:result = substitute(l:result,
-        \ '<a\s[^>]*href="\([^"]*\)"[^>]*>\(\_.\{-}\)</a>',
-        \ '\=s:make_markdown_link(submatch(1), submatch(2))', 'gi')
+        \ '\c<a\s[^>]*href=["'']\([^"'']*\)["''][^>]*>\(\_.\{-}\)</a>',
+        \ '\=s:make_markdown_link(submatch(1), submatch(2))', 'g')
 
   " Handle empty link text - use URL as text
   let l:result = substitute(l:result, '\[\](\([^)]*\))', '[\1](\1)', 'g')
@@ -163,7 +152,7 @@ function! s:convert_html_to_markdown(html) abort
   " Decode common HTML entities
   let l:result = s:decode_html_entities(l:result)
 
-  " Clean up excessive whitespace
+  " Clean up excessive whitespace (but preserve single spaces between words)
   let l:result = substitute(l:result, '\s\+', ' ', 'g')
   let l:result = substitute(l:result, '^\s\+\|\s\+$', '', 'g')
 
@@ -176,8 +165,12 @@ function! s:make_markdown_link(url, text) abort
   let l:clean_text = substitute(a:text, '<[^>]*>', '', 'g')
   " Decode HTML entities in the text
   let l:clean_text = s:decode_html_entities(l:clean_text)
-  " Trim whitespace
-  let l:clean_text = substitute(l:clean_text, '^\s\+\|\s\+$', '', 'g')
+  " Trim leading whitespace
+  let l:clean_text = substitute(l:clean_text, '^\s*', '', '')
+  " Trim trailing whitespace
+  let l:clean_text = substitute(l:clean_text, '\s*$', '', '')
+  " Normalize internal whitespace
+  let l:clean_text = substitute(l:clean_text, '\s\+', ' ', 'g')
 
   " If text is empty, use URL
   if empty(l:clean_text)
@@ -228,4 +221,28 @@ function! s:insert_text(text) abort
 
   " Restore register
   call setreg('z', l:save_reg, l:save_regtype)
+endfunction
+
+" ============================================================================
+" Test Helper Functions (exposed for unit testing)
+" ============================================================================
+
+" Test helper: convert HTML to markdown
+function! paste_as_markdown_link#test_convert(html) abort
+  return s:convert_html_to_markdown(a:html)
+endfunction
+
+" Test helper: detect platform
+function! paste_as_markdown_link#test_platform() abort
+  return s:detect_platform()
+endfunction
+
+" Test helper: decode HTML entities
+function! paste_as_markdown_link#test_decode_entities(text) abort
+  return s:decode_html_entities(a:text)
+endfunction
+
+" Test helper: make markdown link
+function! paste_as_markdown_link#test_make_link(url, text) abort
+  return s:make_markdown_link(a:url, a:text)
 endfunction
