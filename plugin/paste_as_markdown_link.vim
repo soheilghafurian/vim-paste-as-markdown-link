@@ -26,9 +26,23 @@ if !exists('g:paste_as_markdown_link_linux_tool')
   let g:paste_as_markdown_link_linux_tool = 'xclip'
 endif
 
-" Commands
-command! PasteAsMarkdownLink call paste_as_markdown_link#paste()
+" Filetypes where the plugin is active (default: markdown only)
+if !exists('g:paste_as_markdown_link_filetypes')
+  let g:paste_as_markdown_link_filetypes = ['markdown', 'md']
+endif
 
-" Plug mappings for user customization
+" Plug mappings for user customization (always available for manual mapping)
 nnoremap <silent> <Plug>(PasteAsMarkdownLink) :call paste_as_markdown_link#paste()<CR>
 inoremap <silent> <Plug>(PasteAsMarkdownLinkInsert) <C-o>:call paste_as_markdown_link#paste()<CR>
+
+" Buffer-local command setup for supported filetypes
+function! s:setup_buffer() abort
+  if index(g:paste_as_markdown_link_filetypes, &filetype) >= 0
+    command! -buffer PasteAsMarkdownLink call paste_as_markdown_link#paste()
+  endif
+endfunction
+
+augroup paste_as_markdown_link
+  autocmd!
+  autocmd FileType * call s:setup_buffer()
+augroup END

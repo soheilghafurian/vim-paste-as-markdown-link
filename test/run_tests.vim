@@ -229,8 +229,12 @@ let g:paste_as_markdown_link_enabled = 0
 call s:assert_equal(0, g:paste_as_markdown_link_enabled, 'Plugin can be disabled')
 let g:paste_as_markdown_link_enabled = 1
 
-" Test command exists
-call s:assert_equal(2, exists(':PasteAsMarkdownLink'), 'PasteAsMarkdownLink command exists')
+" Test filetypes config exists
+call s:assert_equal(1, exists('g:paste_as_markdown_link_filetypes'), 'Filetypes config exists')
+call s:assert_equal(['markdown', 'md'], g:paste_as_markdown_link_filetypes, 'Default filetypes are markdown')
+
+" Test Plug mapping exists
+call s:assert_equal(1, hasmapto('paste_as_markdown_link#paste()'), 'Plug mapping exists')
 
 " ============================================================================
 " Test: Additional Edge Cases

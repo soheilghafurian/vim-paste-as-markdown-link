@@ -90,6 +90,21 @@ imap <C-S-v> <Plug>(PasteAsMarkdownLinkInsert)
 
 ## Configuration
 
+### Supported Filetypes
+
+By default, the `:PasteAsMarkdownLink` command is only available in markdown files. To enable it for other filetypes:
+
+```vim
+" Add more filetypes (default: ['markdown', 'md'])
+let g:paste_as_markdown_link_filetypes = ['markdown', 'md', 'text', 'rst']
+```
+
+To use in all filetypes, add a global mapping in your `.vimrc`:
+
+```vim
+nmap <leader>p <Plug>(PasteAsMarkdownLink)
+```
+
 ### Enable/Disable Plugin
 
 ```vim

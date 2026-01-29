@@ -33,7 +33,9 @@ Testing Platform Detection:
 Testing Plugin Configuration:
   PASS: Plugin enabled by default
   PASS: Plugin can be disabled
-  PASS: PasteAsMarkdownLink command exists
+  PASS: Filetypes config exists
+  PASS: Default filetypes are markdown
+  PASS: Plug mapping exists
 
 Testing Additional Edge Cases:
   PASS: Deeply nested HTML in anchor
@@ -51,5 +53,5 @@ Testing Helper Functions:
   PASS: decode_entities handles multiple entities
 
 ============================================================
-Test Results: 37/37 passed
+Test Results: 39/39 passed
 ============================================================
