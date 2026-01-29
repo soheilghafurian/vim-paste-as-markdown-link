@@ -35,7 +35,7 @@ sudo pacman -S xclip
 Add this line to your `.vimrc`:
 
 ```vim
-Plugin 'your-username/paste_as_markdown_link'
+Plugin 'soheilghafurian/vim-passte-as-markdown-link'
 ```
 
 Then run `:PluginInstall` in Vim.
@@ -43,7 +43,7 @@ Then run `:PluginInstall` in Vim.
 ### Using vim-plug
 
 ```vim
-Plug 'your-username/paste_as_markdown_link'
+Plug 'soheilghafurian/vim-passte-as-markdown-link'
 ```
 
 Then run `:PlugInstall` in Vim.
@@ -56,7 +56,7 @@ Clone this repository into your Vim packages directory:
 # Vim 8+ native package manager
 mkdir -p ~/.vim/pack/plugins/start
 cd ~/.vim/pack/plugins/start
-git clone https://github.com/your-username/paste_as_markdown_link.git
+git clone https://github.com/soheilghafurian/vim-passte-as-markdown-link.git
 ```
 
 ## Usage
