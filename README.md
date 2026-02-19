@@ -69,16 +69,20 @@ git clone https://github.com/soheilghafurian/vim-paste-as-markdown-link.git
 
 ### Mappings
 
-The plugin provides `<Plug>` mappings for customization. Add your preferred mapping to your `.vimrc`:
+The plugin provides `<Plug>` mappings for customization. Add your preferred mappings to your `.vimrc`:
 
 ```vim
-" Normal mode mapping
+" Normal mode — paste as markdown link at the cursor
 nmap <leader>p <Plug>(PasteAsMarkdownLink)
 
-" Or use Ctrl+Shift+V
-nmap <C-S-v> <Plug>(PasteAsMarkdownLink)
+" Insert mode — paste as markdown link without leaving insert mode
+imap <C-p> <Plug>(PasteAsMarkdownLinkInsert)
+```
 
-" Insert mode mapping
+You can substitute `<leader>p` and `<C-p>` with any keys you prefer, for example:
+
+```vim
+nmap <C-S-v> <Plug>(PasteAsMarkdownLink)
 imap <C-S-v> <Plug>(PasteAsMarkdownLinkInsert)
 ```
 
