@@ -3,6 +3,12 @@
 " Version: 1.0.0
 " License: MIT
 
+" Cached platform detection result
+let s:cached_platform = ''
+
+" Path to this script's directory (resolved at script load time)
+let s:script_dir = expand('<sfile>:p:h') . '/'
+
 " Main paste function
 function! paste_as_markdown_link#paste() abort
   if !g:paste_as_markdown_link_enabled
@@ -30,13 +36,19 @@ endfunction
 
 " Detect the current platform
 function! s:detect_platform() abort
-  if has('mac') || has('macunix') || system('uname') =~? 'darwin'
-    return 'macos'
-  elseif has('unix')
-    return 'linux'
-  else
-    return 'unknown'
+  if !empty(s:cached_platform)
+    return s:cached_platform
   endif
+
+  if has('mac') || has('macunix') || system('uname') =~? 'darwin'
+    let s:cached_platform = 'macos'
+  elseif has('unix')
+    let s:cached_platform = 'linux'
+  else
+    let s:cached_platform = 'unknown'
+  endif
+
+  return s:cached_platform
 endfunction
 
 " Get HTML content from clipboard (platform-specific)
@@ -52,9 +64,43 @@ function! s:get_html_clipboard() abort
   return ''
 endfunction
 
-" Get HTML clipboard on macOS using osascript
+" Get the path to the compiled Swift clipboard helper binary
+function! s:get_swift_helper_path() abort
+  return s:script_dir . 'clipboard_html'
+endfunction
+
+" Compile the Swift clipboard helper if it doesn't exist yet
+function! s:ensure_swift_helper() abort
+  let l:binary = s:get_swift_helper_path()
+  if filereadable(l:binary)
+    return l:binary
+  endif
+
+  let l:source = l:binary . '.swift'
+  if !filereadable(l:source)
+    return ''
+  endif
+
+  silent call system('swiftc -O -o ' . shellescape(l:binary) . ' ' . shellescape(l:source))
+  if v:shell_error != 0
+    return ''
+  endif
+
+  return l:binary
+endfunction
+
+" Get HTML clipboard on macOS using compiled Swift helper (fast) or osascript (fallback)
 function! s:get_html_clipboard_macos() abort
-  " AppleScript to get HTML clipboard and decode from hex
+  " Try the fast compiled Swift helper first
+  let l:binary = s:ensure_swift_helper()
+  if !empty(l:binary)
+    let l:result = system(shellescape(l:binary))
+    if v:shell_error == 0
+      return l:result
+    endif
+  endif
+
+  " Fallback: AppleScript to get HTML clipboard (slower, ~1-3s)
   let l:script = 'use framework "Foundation"' . "\n"
   let l:script .= 'use framework "AppKit"' . "\n"
   let l:script .= 'set pb to current application''s NSPasteboard''s generalPasteboard()' . "\n"
