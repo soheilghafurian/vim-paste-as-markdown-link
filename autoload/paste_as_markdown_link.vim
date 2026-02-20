@@ -20,16 +20,8 @@ function! paste_as_markdown_link#paste() abort
   " Get plain text first (fast — uses Vim register, no subprocess)
   let l:plain = s:get_plain_clipboard()
 
-  " URL fast path: skip image check, only check HTML
+  " URL fast path: prompt immediately, defer HTML check to after user responds
   if s:is_url(l:plain)
-    let l:html_content = s:get_html_clipboard()
-    if !empty(l:html_content)
-      let l:markdown = s:convert_html_to_markdown(l:html_content)
-      if !empty(l:markdown)
-        call s:insert_text(l:markdown)
-        return
-      endif
-    endif
     call s:paste_url(l:plain)
     return
   endif
@@ -415,6 +407,15 @@ function! s:paste_url(url) abort
   if !empty(l:title)
     call s:insert_text('[' . l:title . '](' . l:url . ')')
   else
+    " Check if clipboard has HTML with a richer link (e.g. copied from browser)
+    let l:html_content = s:get_html_clipboard()
+    if !empty(l:html_content)
+      let l:markdown = s:convert_html_to_markdown(l:html_content)
+      if !empty(l:markdown)
+        call s:insert_text(l:markdown)
+        return
+      endif
+    endif
     call s:insert_text(l:url)
   endif
 endfunction
