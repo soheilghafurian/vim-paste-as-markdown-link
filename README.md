@@ -5,6 +5,7 @@ A Vim plugin that converts HTML links in your clipboard to markdown format when 
 ## Features
 
 - Converts `<a href="url">text</a>` to `[text](url)`
+- **Image paste:** detects image data on the clipboard, saves it to a `<buffer>.assets/` folder, and inserts a markdown image link `![alt](path)`
 - Plain text URLs stay as plain text (only HTML links are converted)
 - Cross-platform support: macOS, Linux Mint, MX Linux
 - Falls back to normal paste when no HTML content is available
@@ -92,6 +93,17 @@ imap <C-S-v> <Plug>(PasteAsMarkdownLinkInsert)
 2. In Vim, use your mapped key or run `:PasteAsMarkdownLink`
 3. The link is inserted as `[link text](url)`
 
+### Image Paste
+
+When the clipboard contains image data (e.g. from a screenshot):
+
+1. Take a screenshot to clipboard (macOS: `Cmd+Shift+4` then `Ctrl`, Linux: screenshot tool with "copy to clipboard")
+2. In Vim, use your mapped key or run `:PasteAsMarkdownLink`
+3. You'll be prompted for an image name (press Enter for an auto-generated timestamp name)
+4. The image is saved to `<buffer-name>.assets/img-<name>.png`
+5. A markdown image link is inserted: `![img-<name>](./<buffer-name>.assets/img-<name>.png)`
+6. The cursor is positioned on the alt text so you can edit it immediately
+
 ## Configuration
 
 ### Supported Filetypes
@@ -121,6 +133,13 @@ let g:paste_as_markdown_link_enabled = 0
 ```vim
 " Set preferred clipboard tool on Linux (default: 'xclip')
 let g:paste_as_markdown_link_linux_tool = 'xclip'
+```
+
+### Image File Extension
+
+```vim
+" Set the file extension for saved clipboard images (default: '.png')
+let g:paste_as_markdown_link_image_extension = '.png'
 ```
 
 ## Examples
@@ -172,7 +191,9 @@ paste_as_markdown_link/
 ├── plugin/
 │   └── paste_as_markdown_link.vim   # Plugin initialization
 ├── autoload/
-│   └── paste_as_markdown_link.vim   # Core functions (lazy-loaded)
+│   ├── paste_as_markdown_link.vim   # Core functions (lazy-loaded)
+│   ├── clipboard_html.swift         # Swift helper for HTML clipboard (macOS)
+│   └── clipboard_image.swift        # Swift helper for image clipboard (macOS)
 ├── test/
 │   ├── run_tests.vim                # Unit test suite
 │   └── run_tests.sh                 # Test runner script
