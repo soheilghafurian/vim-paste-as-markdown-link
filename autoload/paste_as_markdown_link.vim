@@ -17,14 +17,30 @@ function! paste_as_markdown_link#paste() abort
     return
   endif
 
-  " Check for image first
+  " Get plain text first (fast — uses Vim register, no subprocess)
+  let l:plain = s:get_plain_clipboard()
+
+  " URL fast path: skip image check, only check HTML
+  if s:is_url(l:plain)
+    let l:html_content = s:get_html_clipboard()
+    if !empty(l:html_content)
+      let l:markdown = s:convert_html_to_markdown(l:html_content)
+      if !empty(l:markdown)
+        call s:insert_text(l:markdown)
+        return
+      endif
+    endif
+    call s:paste_url(l:plain)
+    return
+  endif
+
+  " Non-URL path: check image first, then HTML, then plain text
   if s:has_image_clipboard()
     call s:paste_image()
     return
   endif
 
   let l:html_content = s:get_html_clipboard()
-
   if !empty(l:html_content)
     let l:markdown = s:convert_html_to_markdown(l:html_content)
     if !empty(l:markdown)
@@ -33,14 +49,8 @@ function! paste_as_markdown_link#paste() abort
     endif
   endif
 
-  " Fallback to plain text paste
-  let l:plain = s:get_plain_clipboard()
   if !empty(l:plain)
-    if s:is_url(l:plain)
-      call s:paste_url(l:plain)
-    else
-      call s:insert_text(l:plain)
-    endif
+    call s:insert_text(l:plain)
   endif
 endfunction
 
@@ -162,6 +172,13 @@ endfunction
 
 " Get plain text from clipboard
 function! s:get_plain_clipboard() abort
+  " Try Vim's clipboard register first (instant, no subprocess)
+  let l:result = getreg('+')
+  if !empty(l:result)
+    return l:result
+  endif
+
+  " Fall back to platform-specific clipboard tool
   let l:platform = s:detect_platform()
 
   if l:platform ==# 'macos'
@@ -176,13 +193,11 @@ function! s:get_plain_clipboard() abort
       let l:result = system('xclip -selection clipboard -o 2>/dev/null')
     endif
   else
-    " Try using Vim's + register
-    let l:result = getreg('+')
+    return ''
   endif
 
   if v:shell_error != 0
-    " Fallback to Vim's clipboard register
-    return getreg('+')
+    return ''
   endif
 
   return l:result
