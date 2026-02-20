@@ -66,6 +66,24 @@ Testing Auto-generated Image Name:
   PASS: Auto-generated name is not empty
   PASS: Auto-generated name matches YYYYMMDD-HHMMSS format
 
+Testing URL Detection:
+  PASS: http URL detected
+  PASS: https URL detected
+  PASS: URL with path/query/anchor detected
+  PASS: Plain text is not a URL
+  PASS: Domain without protocol is not a URL
+  PASS: ftp URL is not detected (only http/https)
+  PASS: URL with surrounding text is not a URL
+  PASS: Empty string is not a URL
+  PASS: URL with surrounding whitespace detected
+  PASS: URL with space in middle is not valid
+
+Testing Markdown Link String Construction:
+  PASS: Markdown link with title constructed correctly
+  PASS: Empty title uses URL as link text
+  PASS: Link with special chars in title
+  PASS: Link with long URL
+
 ============================================================
-Test Results: 47/47 passed
+Test Results: 61/61 passed
 ============================================================

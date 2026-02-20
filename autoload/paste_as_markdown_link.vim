@@ -36,7 +36,11 @@ function! paste_as_markdown_link#paste() abort
   " Fallback to plain text paste
   let l:plain = s:get_plain_clipboard()
   if !empty(l:plain)
-    call s:insert_text(l:plain)
+    if s:is_url(l:plain)
+      call s:paste_url(l:plain)
+    else
+      call s:insert_text(l:plain)
+    endif
   endif
 endfunction
 
@@ -383,6 +387,23 @@ function! s:decode_html_entities(text) abort
   return l:result
 endfunction
 
+" Check if text is a URL
+function! s:is_url(text) abort
+  let l:trimmed = substitute(a:text, '^\s*\|\s*$', '', 'g')
+  return l:trimmed =~# '^https\?://\S\+$'
+endfunction
+
+" Prompt for link title and insert markdown link or raw URL
+function! s:paste_url(url) abort
+  let l:url = substitute(a:url, '^\s*\|\s*$', '', 'g')
+  let l:title = input('Link title (Enter for raw URL): ')
+  if !empty(l:title)
+    call s:insert_text('[' . l:title . '](' . l:url . ')')
+  else
+    call s:insert_text(l:url)
+  endif
+endfunction
+
 " Insert text at cursor position
 function! s:insert_text(text) abort
   " Use put command with a temporary register
@@ -429,4 +450,9 @@ endfunction
 " Test helper: build image markdown
 function! paste_as_markdown_link#test_build_image_markdown(buf_name, img_name, ext) abort
   return s:build_image_markdown(a:buf_name, a:img_name, a:ext)
+endfunction
+
+" Test helper: check if text is a URL
+function! paste_as_markdown_link#test_is_url(text) abort
+  return s:is_url(a:text)
 endfunction

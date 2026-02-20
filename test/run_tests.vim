@@ -360,6 +360,66 @@ call s:assert_not_empty(s:auto_name, 'Auto-generated name is not empty')
 call s:assert_match('^\d\{8}-\d\{6}$', s:auto_name, 'Auto-generated name matches YYYYMMDD-HHMMSS format')
 
 " ============================================================================
+" Test: URL Detection (s:is_url via test_is_url)
+" ============================================================================
+
+call add(s:test_output, '')
+call add(s:test_output, 'Testing URL Detection:')
+
+" Test http URL
+call s:assert_equal(1, paste_as_markdown_link#test_is_url('http://example.com'), 'http URL detected')
+
+" Test https URL
+call s:assert_equal(1, paste_as_markdown_link#test_is_url('https://example.com'), 'https URL detected')
+
+" Test URL with path and query
+call s:assert_equal(1, paste_as_markdown_link#test_is_url('https://example.com/path?query=value&other=123#anchor'), 'URL with path/query/anchor detected')
+
+" Test non-URL strings
+call s:assert_equal(0, paste_as_markdown_link#test_is_url('just some text'), 'Plain text is not a URL')
+call s:assert_equal(0, paste_as_markdown_link#test_is_url('example.com'), 'Domain without protocol is not a URL')
+call s:assert_equal(0, paste_as_markdown_link#test_is_url('ftp://example.com'), 'ftp URL is not detected (only http/https)')
+
+" Test URL with surrounding text
+call s:assert_equal(0, paste_as_markdown_link#test_is_url('visit https://example.com now'), 'URL with surrounding text is not a URL')
+
+" Test empty string
+call s:assert_equal(0, paste_as_markdown_link#test_is_url(''), 'Empty string is not a URL')
+
+" Test URL with leading/trailing whitespace (should still match after trim)
+call s:assert_equal(1, paste_as_markdown_link#test_is_url('  https://example.com  '), 'URL with surrounding whitespace detected')
+
+" Test URL with spaces in the middle (should not match)
+call s:assert_equal(0, paste_as_markdown_link#test_is_url('https://example .com'), 'URL with space in middle is not valid')
+
+" ============================================================================
+" Test: Markdown Link String Construction
+" ============================================================================
+
+call add(s:test_output, '')
+call add(s:test_output, 'Testing Markdown Link String Construction:')
+
+" Test that [title](url) format is correct via make_link helper
+let s:result = paste_as_markdown_link#test_make_link('https://example.com', 'My Title')
+let s:expected = '[My Title](https://example.com)'
+call s:assert_equal(s:expected, s:result, 'Markdown link with title constructed correctly')
+
+" Test raw URL pass-through (empty title means URL used as text)
+let s:result = paste_as_markdown_link#test_make_link('https://example.com', '')
+let s:expected = '[https://example.com](https://example.com)'
+call s:assert_equal(s:expected, s:result, 'Empty title uses URL as link text')
+
+" Test link with special characters in title
+let s:result = paste_as_markdown_link#test_make_link('https://example.com', 'Title & More')
+let s:expected = '[Title & More](https://example.com)'
+call s:assert_equal(s:expected, s:result, 'Link with special chars in title')
+
+" Test link with long URL
+let s:result = paste_as_markdown_link#test_make_link('https://example.com/very/long/path?q=1&r=2#section', 'Docs')
+let s:expected = '[Docs](https://example.com/very/long/path?q=1&r=2#section)'
+call s:assert_equal(s:expected, s:result, 'Link with long URL')
+
+" ============================================================================
 " Print Results
 " ============================================================================
 

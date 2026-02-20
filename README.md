@@ -5,8 +5,8 @@ A Vim plugin that converts HTML links in your clipboard to markdown format when 
 ## Features
 
 - Converts `<a href="url">text</a>` to `[text](url)`
+- **URL paste:** when the clipboard contains a plain-text URL, prompts for a link title and inserts `[title](url)` (or the raw URL if no title is given)
 - **Image paste:** detects image data on the clipboard, saves it to a `<buffer>.assets/` folder, and inserts a markdown image link `![alt](path)`
-- Plain text URLs stay as plain text (only HTML links are converted)
 - Cross-platform support: macOS, Linux Mint, MX Linux
 - Falls back to normal paste when no HTML content is available
 
@@ -104,6 +104,17 @@ When the clipboard contains image data (e.g. from a screenshot):
 5. A markdown image link is inserted: `![img-<name>](./<buffer-name>.assets/img-<name>.png)`
 6. The cursor is positioned on the alt text so you can edit it immediately
 
+### URL Paste
+
+When the clipboard contains a plain-text URL (no HTML, no image):
+
+1. Copy a URL like `https://example.com` to your clipboard
+2. In Vim, use your mapped key or run `:PasteAsMarkdownLink`
+3. You'll be prompted for a link title
+4. Enter a title → inserts `[title](url)`
+5. Press Enter without a title → inserts the raw URL as-is
+6. Works in both normal and insert mode, preserving your current mode
+
 ## Configuration
 
 ### Supported Filetypes
@@ -149,7 +160,8 @@ let g:paste_as_markdown_link_image_extension = '.png'
 | `<a href="https://example.com">Click here</a>` | `[Click here](https://example.com)` |
 | `<a href="https://github.com">GitHub</a>` | `[GitHub](https://github.com)` |
 | `<a href="https://vim.org"></a>` | `[https://vim.org](https://vim.org)` |
-| Plain text with URL | Plain text with URL (unchanged) |
+| Plain text URL (e.g. `https://example.com`) | Prompts for title → `[title](url)` or raw URL |
+| Plain text (not a URL) | Plain text (unchanged) |
 
 ## Troubleshooting
 
