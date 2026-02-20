@@ -17,6 +17,12 @@ function! paste_as_markdown_link#paste() abort
     return
   endif
 
+  " Check for image first
+  if s:has_image_clipboard()
+    call s:paste_image()
+    return
+  endif
+
   let l:html_content = s:get_html_clipboard()
 
   if !empty(l:html_content)
@@ -178,6 +184,133 @@ function! s:get_plain_clipboard() abort
   return l:result
 endfunction
 
+" ============================================================================
+" Image Clipboard Functions
+" ============================================================================
+
+" Get the path to the compiled Swift image clipboard helper binary
+function! s:get_image_swift_helper_path() abort
+  return s:script_dir . 'clipboard_image'
+endfunction
+
+" Compile the Swift image clipboard helper if it doesn't exist yet
+function! s:ensure_image_swift_helper() abort
+  let l:binary = s:get_image_swift_helper_path()
+  if filereadable(l:binary)
+    return l:binary
+  endif
+
+  let l:source = l:binary . '.swift'
+  if !filereadable(l:source)
+    return ''
+  endif
+
+  silent call system('swiftc -O -o ' . shellescape(l:binary) . ' ' . shellescape(l:source))
+  if v:shell_error != 0
+    return ''
+  endif
+
+  return l:binary
+endfunction
+
+" Check if clipboard contains image data (platform-specific)
+function! s:has_image_clipboard() abort
+  let l:platform = s:detect_platform()
+
+  if l:platform ==# 'macos'
+    " Try compiled Swift helper first (fast)
+    let l:binary = s:ensure_image_swift_helper()
+    if !empty(l:binary)
+      silent call system(shellescape(l:binary))
+      return v:shell_error == 0
+    endif
+    " Fallback: osascript check
+    let l:script = 'use framework "AppKit"' . "\n"
+    let l:script .= 'set pb to current application''s NSPasteboard''s generalPasteboard()' . "\n"
+    let l:script .= 'set types to pb''s types() as list' . "\n"
+    let l:script .= 'if types contains "public.png" or types contains "public.tiff" then' . "\n"
+    let l:script .= '  return "yes"' . "\n"
+    let l:script .= 'else' . "\n"
+    let l:script .= '  return "no"' . "\n"
+    let l:script .= 'end if'
+    let l:result = system('osascript -e ' . shellescape(l:script))
+    return l:result =~# 'yes'
+  elseif l:platform ==# 'linux'
+    let l:types = system('xclip -selection clipboard -t TARGETS -o 2>/dev/null')
+    return l:types =~# 'image/png'
+  endif
+
+  return 0
+endfunction
+
+" Save clipboard image to a file path (platform-specific)
+function! s:save_clipboard_image(path) abort
+  let l:platform = s:detect_platform()
+
+  if l:platform ==# 'macos'
+    let l:binary = s:ensure_image_swift_helper()
+    if !empty(l:binary)
+      silent call system(shellescape(l:binary) . ' ' . shellescape(a:path))
+      return v:shell_error == 0
+    endif
+    return 0
+  elseif l:platform ==# 'linux'
+    silent call system('xclip -selection clipboard -t image/png -o > ' . shellescape(a:path) . ' 2>/dev/null')
+    return v:shell_error == 0
+  endif
+
+  return 0
+endfunction
+
+" Build the markdown text for an image link
+function! s:build_image_markdown(buf_name, img_name, ext) abort
+  let l:filename = 'img-' . a:img_name . a:ext
+  return '![img-' . a:img_name . '](./' . a:buf_name . '.assets/' . l:filename . ')'
+endfunction
+
+" Main image paste orchestration
+function! s:paste_image() abort
+  let l:buf_name = expand('%:t:r')
+  let l:buf_dir = expand('%:p:h')
+  let l:ext = g:paste_as_markdown_link_image_extension
+
+  " Build assets directory path
+  let l:assets_dir = l:buf_dir . '/' . l:buf_name . '.assets'
+
+  " Prompt for image name
+  let l:img_name = input('Image name (Enter for auto): ')
+
+  " Auto-generate name if empty
+  if empty(l:img_name)
+    let l:img_name = strftime('%Y%m%d-%H%M%S')
+  endif
+
+  " Build filename
+  let l:filename = 'img-' . l:img_name . l:ext
+
+  " Create assets directory if needed
+  if !isdirectory(l:assets_dir)
+    call mkdir(l:assets_dir, 'p')
+  endif
+
+  " Save clipboard image
+  let l:save_path = l:assets_dir . '/' . l:filename
+  if !s:save_clipboard_image(l:save_path)
+    echohl ErrorMsg
+    echom 'Failed to save clipboard image to ' . l:save_path
+    echohl None
+    return
+  endif
+
+  " Build and insert markdown
+  let l:markdown = s:build_image_markdown(l:buf_name, l:img_name, l:ext)
+  call s:insert_text(l:markdown)
+
+  " Position cursor after '[' so user can edit alt text
+  execute "normal! `[f[l"
+  stopinsert
+endfunction
+
 " Convert HTML content to markdown
 function! s:convert_html_to_markdown(html) abort
   let l:result = a:html
@@ -291,4 +424,9 @@ endfunction
 " Test helper: make markdown link
 function! paste_as_markdown_link#test_make_link(url, text) abort
   return s:make_markdown_link(a:url, a:text)
+endfunction
+
+" Test helper: build image markdown
+function! paste_as_markdown_link#test_build_image_markdown(buf_name, img_name, ext) abort
+  return s:build_image_markdown(a:buf_name, a:img_name, a:ext)
 endfunction

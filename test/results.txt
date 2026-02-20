@@ -52,6 +52,20 @@ Testing Helper Functions:
   PASS: make_link strips HTML from text
   PASS: decode_entities handles multiple entities
 
+Testing Image Markdown Generation:
+  PASS: Basic image markdown generation
+  PASS: Image markdown with .jpg extension
+  PASS: Image markdown with timestamp name
+  PASS: Image markdown with hyphenated buffer name
+
+Testing Image Extension Config:
+  PASS: Image extension config exists
+  PASS: Default image extension is .png
+
+Testing Auto-generated Image Name:
+  PASS: Auto-generated name is not empty
+  PASS: Auto-generated name matches YYYYMMDD-HHMMSS format
+
 ============================================================
-Test Results: 39/39 passed
+Test Results: 47/47 passed
 ============================================================

@@ -22,6 +22,10 @@ if !exists('g:paste_as_markdown_link_enabled')
   let g:paste_as_markdown_link_enabled = 1
 endif
 
+if !exists('g:paste_as_markdown_link_image_extension')
+  let g:paste_as_markdown_link_image_extension = '.png'
+endif
+
 if !exists('g:paste_as_markdown_link_linux_tool')
   let g:paste_as_markdown_link_linux_tool = 'xclip'
 endif

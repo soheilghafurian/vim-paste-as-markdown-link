@@ -310,6 +310,56 @@ let s:expected = '&<>"'
 call s:assert_equal(s:expected, s:result, 'decode_entities handles multiple entities')
 
 " ============================================================================
+" Test: Image Markdown Generation
+" ============================================================================
+
+call add(s:test_output, '')
+call add(s:test_output, 'Testing Image Markdown Generation:')
+
+" Test basic image markdown generation
+let s:result = paste_as_markdown_link#test_build_image_markdown('notes', 'screenshot', '.png')
+let s:expected = '![img-screenshot](./notes.assets/img-screenshot.png)'
+call s:assert_equal(s:expected, s:result, 'Basic image markdown generation')
+
+" Test image markdown with .jpg extension
+let s:result = paste_as_markdown_link#test_build_image_markdown('notes', 'photo', '.jpg')
+let s:expected = '![img-photo](./notes.assets/img-photo.jpg)'
+call s:assert_equal(s:expected, s:result, 'Image markdown with .jpg extension')
+
+" Test image markdown with auto-generated name format
+let s:result = paste_as_markdown_link#test_build_image_markdown('README', '20250101-120000', '.png')
+let s:expected = '![img-20250101-120000](./README.assets/img-20250101-120000.png)'
+call s:assert_equal(s:expected, s:result, 'Image markdown with timestamp name')
+
+" Test image markdown with different buffer name
+let s:result = paste_as_markdown_link#test_build_image_markdown('my-document', 'diagram', '.png')
+let s:expected = '![img-diagram](./my-document.assets/img-diagram.png)'
+call s:assert_equal(s:expected, s:result, 'Image markdown with hyphenated buffer name')
+
+" ============================================================================
+" Test: Image Extension Config Default
+" ============================================================================
+
+call add(s:test_output, '')
+call add(s:test_output, 'Testing Image Extension Config:')
+
+" Test default image extension config
+call s:assert_equal(1, exists('g:paste_as_markdown_link_image_extension'), 'Image extension config exists')
+call s:assert_equal('.png', g:paste_as_markdown_link_image_extension, 'Default image extension is .png')
+
+" ============================================================================
+" Test: Auto-generated Image Name Format
+" ============================================================================
+
+call add(s:test_output, '')
+call add(s:test_output, 'Testing Auto-generated Image Name:')
+
+" Test that strftime produces a non-empty result with expected format
+let s:auto_name = strftime('%Y%m%d-%H%M%S')
+call s:assert_not_empty(s:auto_name, 'Auto-generated name is not empty')
+call s:assert_match('^\d\{8}-\d\{6}$', s:auto_name, 'Auto-generated name matches YYYYMMDD-HHMMSS format')
+
+" ============================================================================
 " Print Results
 " ============================================================================
 
