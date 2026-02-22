@@ -76,16 +76,13 @@ The plugin provides `<Plug>` mappings for customization. Add your preferred mapp
 " Normal mode — paste as markdown link at the cursor
 nmap <leader>p <Plug>(PasteAsMarkdownLink)
 
-" Insert mode — paste as markdown link without leaving insert mode
-imap <C-p> <Plug>(PasteAsMarkdownLinkInsert)
+" Insert mode — paste as markdown link without leaving insert mode (Alt+p)
+imap <Esc>p <Plug>(PasteAsMarkdownLinkInsert)
 ```
 
-You can substitute `<leader>p` and `<C-p>` with any keys you prefer, for example:
+**Note:** Use `nmap`/`imap` (not `nnoremap`/`inoremap`) — `<Plug>` mappings require the recursive variants so Vim can resolve the `<Plug>` pseudo-key.
 
-```vim
-nmap <C-S-v> <Plug>(PasteAsMarkdownLink)
-imap <C-S-v> <Plug>(PasteAsMarkdownLinkInsert)
-```
+You can substitute `<leader>p` and `<Esc>p` with any keys you prefer. Avoid `<C-S-v>` — terminal Vim cannot distinguish it from `<C-v>`, which would override visual block mode.
 
 ### Workflow
 
